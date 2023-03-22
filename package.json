@@ -2,9 +2,9 @@
   "name": "forked-web3auth-wagmi-connector",
   "version": "3.0.1",
   "description": "wagmi connector to connect with web3auth SDK",
-  "main": "dist/web3authWagmiConnector.cjs.js",
-  "unpkg": "dist/web3authWagmiConnector.umd.min.js",
-  "jsdelivr": "dist/web3authWagmiConnector.umd.min.js",
+  "main": "dist/forkedWeb3authWagmiConnector.cjs.js",
+  "unpkg": "dist/forkedWeb3authWagmiConnector.umd.min.js",
+  "jsdelivr": "dist/forkedWeb3authWagmiConnector.umd.min.js",
   "types": "dist/types/index.d.ts",
   "repository": "",
   "license": "MIT",
@@ -12,8 +12,8 @@
   "exports": {
     ".": {
       "types": "./dist/types/index.d.ts",
-      "import": "./dist/web3authWagmiConnector.esm.js",
-      "require": "./dist/web3authWagmiConnector.cjs.js"
+      "import": "./dist/forkedWeb3authWagmiConnector.esm.js",
+      "require": "./dist/forkedWweb3authWagmiConnector.cjs.js"
     }
   },
   "keywords": [],
