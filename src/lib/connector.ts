@@ -1,6 +1,6 @@
 import { Address, Connector, ConnectorData, normalizeChainId, UserRejectedRequestError } from "@wagmi/core";
 import { Chain } from "@wagmi/core/chains";
-import { ADAPTER_STATUS, CHAIN_NAMESPACES, IWeb3Auth, SafeEventEmitterProvider, WALLET_ADAPTER_TYPE, WALLET_ADAPTERS } from "@web3auth/base";
+import pkg, { IWeb3Auth, SafeEventEmitterProvider, WALLET_ADAPTER_TYPE } from "@web3auth/base";
 import type { IWeb3AuthModal, ModalConfig } from "@web3auth/modal";
 import type { OpenloginLoginParams } from "@web3auth/openlogin-adapter";
 import { providers, Signer, utils } from "ethers";
@@ -8,6 +8,7 @@ import { providers, Signer, utils } from "ethers";
 import log from "loglevel";
 
 import type { Options } from "./interfaces";
+const { ADAPTER_STATUS, CHAIN_NAMESPACES, WALLET_ADAPTERS } = pkg;
 
 const IS_SERVER = typeof window === "undefined";
 

@@ -1,9 +1,14 @@
 import _defineProperty from '@babel/runtime/helpers/defineProperty';
 import { Connector, UserRejectedRequestError, normalizeChainId } from '@wagmi/core';
-import { ADAPTER_STATUS, WALLET_ADAPTERS, CHAIN_NAMESPACES } from '@web3auth/base';
+import pkg from '@web3auth/base';
 import { providers, utils } from 'ethers';
 import log from 'loglevel';
 
+const {
+  ADAPTER_STATUS,
+  CHAIN_NAMESPACES,
+  WALLET_ADAPTERS
+} = pkg;
 const IS_SERVER = typeof window === "undefined";
 function isIWeb3AuthModal(obj) {
   return typeof obj.initModal !== "undefined";

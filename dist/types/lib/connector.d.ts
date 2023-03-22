@@ -1,6 +1,6 @@
 import { Address, Connector, ConnectorData } from "@wagmi/core";
 import { Chain } from "@wagmi/core/chains";
-import { IWeb3Auth, SafeEventEmitterProvider, WALLET_ADAPTER_TYPE } from "@web3auth/base";
+import pkg, { IWeb3Auth, SafeEventEmitterProvider, WALLET_ADAPTER_TYPE } from "@web3auth/base";
 import type { IWeb3AuthModal, ModalConfig } from "@web3auth/modal";
 import type { OpenloginLoginParams } from "@web3auth/openlogin-adapter";
 import { Signer } from "ethers";
@@ -20,7 +20,7 @@ export declare class Web3AuthConnector extends Connector<SafeEventEmitterProvide
     });
     connect(): Promise<Required<ConnectorData>>;
     getAccount(): Promise<Address>;
-    getProvider(): Promise<SafeEventEmitterProvider>;
+    getProvider(): Promise<pkg.SafeEventEmitterProvider>;
     getSigner(): Promise<Signer>;
     isAuthorized(): Promise<boolean>;
     getChainId(): Promise<number>;
