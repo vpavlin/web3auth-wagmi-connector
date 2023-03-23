@@ -1,14 +1,13 @@
 import { Address, Connector, ConnectorData, normalizeChainId, UserRejectedRequestError } from "@wagmi/core";
 import { Chain } from "@wagmi/core/chains";
-import pkg, { IWeb3Auth, SafeEventEmitterProvider, WALLET_ADAPTER_TYPE } from "@web3auth/base";
+import { ADAPTER_STATUS, CHAIN_NAMESPACES, IWeb3Auth, SafeEventEmitterProvider, WALLET_ADAPTER_TYPE, WALLET_ADAPTERS } from "@web3auth/base";
 import type { IWeb3AuthModal, ModalConfig } from "@web3auth/modal";
 import type { OpenloginLoginParams } from "@web3auth/openlogin-adapter";
-import { providers, Signer, utils } from "ethers";
-// import { getAddress } from "ethers/lib/utils";
+import { providers, Signer } from "ethers";
 import log from "loglevel";
+import { createWalletClient, custom, CustomTransport, getAccount, WalletClient } from "viem";
 
 import type { Options } from "./interfaces";
-const { ADAPTER_STATUS, CHAIN_NAMESPACES, WALLET_ADAPTERS } = pkg;
 
 const IS_SERVER = typeof window === "undefined";
 
@@ -22,6 +21,8 @@ export class Web3AuthConnector extends Connector<SafeEventEmitterProvider, Optio
   readonly id = "web3auth";
 
   readonly name = "Web3Auth";
+
+  client: WalletClient<CustomTransport, Chain, true>;
 
   provider: SafeEventEmitterProvider | null = null;
 
@@ -73,11 +74,17 @@ export class Web3AuthConnector extends Connector<SafeEventEmitterProvider, Optio
         }
       }
 
-      const signer = await this.getSigner();
-      const account = (await signer.getAddress()) as Address;
+      const chainId = await this.getChainId();
+      this.client = createWalletClient({
+        chain: this.chains.find((x) => x.id === chainId),
+        transport: custom(provider),
+      });
+
+      const account = await this.getAccount();
+
       provider.on("accountsChanged", this.onAccountsChanged.bind(this));
       provider.on("chainChanged", this.onChainChanged.bind(this));
-      const chainId = await this.getChainId();
+
       const unsupported = this.isChainUnsupported(chainId);
       return {
         account,
@@ -94,10 +101,9 @@ export class Web3AuthConnector extends Connector<SafeEventEmitterProvider, Optio
   }
 
   async getAccount(): Promise<Address> {
-    const provider = new providers.Web3Provider(await this.getProvider());
-    const signer = provider.getSigner();
-    const account = await signer.getAddress();
-    return account as Address;
+    const [address] = await this.client.getAddresses();
+    const account = getAccount(address).address;
+    return account;
   }
 
   async getProvider() {
@@ -172,7 +178,7 @@ export class Web3AuthConnector extends Connector<SafeEventEmitterProvider, Optio
 
   protected onAccountsChanged(accounts: string[]): void {
     if (accounts.length === 0) this.emit("disconnect");
-    else this.emit("change", { account: utils.getAddress(accounts[0]) });
+    else this.emit("change", { account: getAccount(accounts[0] as Address).address });
   }
 
   protected isChainUnsupported(chainId: number): boolean {

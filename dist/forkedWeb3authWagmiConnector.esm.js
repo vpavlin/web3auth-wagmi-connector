@@ -1,14 +1,10 @@
 import _defineProperty from '@babel/runtime/helpers/defineProperty';
 import { Connector, UserRejectedRequestError, normalizeChainId } from '@wagmi/core';
-import pkg from '@web3auth/base';
-import { providers, utils } from 'ethers';
+import { ADAPTER_STATUS, WALLET_ADAPTERS, CHAIN_NAMESPACES } from '@web3auth/base';
+import { providers } from 'ethers';
 import log from 'loglevel';
+import { createWalletClient, custom, getAccount } from 'viem';
 
-const {
-  ADAPTER_STATUS,
-  CHAIN_NAMESPACES,
-  WALLET_ADAPTERS
-} = pkg;
 const IS_SERVER = typeof window === "undefined";
 function isIWeb3AuthModal(obj) {
   return typeof obj.initModal !== "undefined";
@@ -26,6 +22,7 @@ class Web3AuthConnector extends Connector {
     _defineProperty(this, "ready", !IS_SERVER);
     _defineProperty(this, "id", "web3auth");
     _defineProperty(this, "name", "Web3Auth");
+    _defineProperty(this, "client", void 0);
     _defineProperty(this, "provider", null);
     _defineProperty(this, "web3AuthInstance", void 0);
     _defineProperty(this, "initialChainId", void 0);
@@ -66,11 +63,14 @@ class Web3AuthConnector extends Connector {
           throw new UserRejectedRequestError("please provide a valid loginParams when not using @web3auth/modal");
         }
       }
-      const signer = await this.getSigner();
-      const account = await signer.getAddress();
+      const chainId = await this.getChainId();
+      this.client = createWalletClient({
+        chain: this.chains.find(x => x.id === chainId),
+        transport: custom(provider)
+      });
+      const account = await this.getAccount();
       provider.on("accountsChanged", this.onAccountsChanged.bind(this));
       provider.on("chainChanged", this.onChainChanged.bind(this));
-      const chainId = await this.getChainId();
       const unsupported = this.isChainUnsupported(chainId);
       return {
         account,
@@ -86,9 +86,8 @@ class Web3AuthConnector extends Connector {
     }
   }
   async getAccount() {
-    const provider = new providers.Web3Provider(await this.getProvider());
-    const signer = provider.getSigner();
-    const account = await signer.getAddress();
+    const [address] = await this.client.getAddresses();
+    const account = getAccount(address).address;
     return account;
   }
   async getProvider() {
@@ -162,7 +161,7 @@ class Web3AuthConnector extends Connector {
   }
   onAccountsChanged(accounts) {
     if (accounts.length === 0) this.emit("disconnect");else this.emit("change", {
-      account: utils.getAddress(accounts[0])
+      account: getAccount(accounts[0]).address
     });
   }
   isChainUnsupported(chainId) {

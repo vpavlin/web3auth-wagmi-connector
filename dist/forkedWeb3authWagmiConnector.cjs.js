@@ -1,7 +1,7 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 210:
+/***/ 528:
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -18,24 +18,20 @@ var defineProperty_default = /*#__PURE__*/__webpack_require__.n(defineProperty_n
 const core_namespaceObject = require("@wagmi/core");
 ;// CONCATENATED MODULE: external "@web3auth/base"
 const base_namespaceObject = require("@web3auth/base");
-var base_default = /*#__PURE__*/__webpack_require__.n(base_namespaceObject);
 ;// CONCATENATED MODULE: external "ethers"
 const external_ethers_namespaceObject = require("ethers");
 ;// CONCATENATED MODULE: external "loglevel"
 const external_loglevel_namespaceObject = require("loglevel");
 var external_loglevel_default = /*#__PURE__*/__webpack_require__.n(external_loglevel_namespaceObject);
+;// CONCATENATED MODULE: external "viem"
+const external_viem_namespaceObject = require("viem");
 ;// CONCATENATED MODULE: ./src/lib/connector.ts
 
 
 
 
-// import { getAddress } from "ethers/lib/utils";
 
-const {
-  ADAPTER_STATUS,
-  CHAIN_NAMESPACES,
-  WALLET_ADAPTERS
-} = (base_default());
+
 const IS_SERVER = typeof window === "undefined";
 function isIWeb3AuthModal(obj) {
   return typeof obj.initModal !== "undefined";
@@ -53,6 +49,7 @@ class Web3AuthConnector extends core_namespaceObject.Connector {
     defineProperty_default()(this, "ready", !IS_SERVER);
     defineProperty_default()(this, "id", "web3auth");
     defineProperty_default()(this, "name", "Web3Auth");
+    defineProperty_default()(this, "client", void 0);
     defineProperty_default()(this, "provider", null);
     defineProperty_default()(this, "web3AuthInstance", void 0);
     defineProperty_default()(this, "initialChainId", void 0);
@@ -68,7 +65,7 @@ class Web3AuthConnector extends core_namespaceObject.Connector {
       this.emit("message", {
         type: "connecting"
       });
-      if (this.web3AuthInstance.status === ADAPTER_STATUS.NOT_READY) {
+      if (this.web3AuthInstance.status === base_namespaceObject.ADAPTER_STATUS.NOT_READY) {
         if (isIWeb3AuthModal(this.web3AuthInstance)) {
           await this.web3AuthInstance.initModal({
             modalConfig: this.modalConfig
@@ -87,17 +84,20 @@ class Web3AuthConnector extends core_namespaceObject.Connector {
         if (isIWeb3AuthModal(this.web3AuthInstance)) {
           provider = await this.web3AuthInstance.connect();
         } else if (this.loginParams) {
-          provider = await this.web3AuthInstance.connectTo(WALLET_ADAPTERS.OPENLOGIN, this.loginParams);
+          provider = await this.web3AuthInstance.connectTo(base_namespaceObject.WALLET_ADAPTERS.OPENLOGIN, this.loginParams);
         } else {
           external_loglevel_default().error("please provide a valid loginParams when not using @web3auth/modal");
           throw new core_namespaceObject.UserRejectedRequestError("please provide a valid loginParams when not using @web3auth/modal");
         }
       }
-      const signer = await this.getSigner();
-      const account = await signer.getAddress();
+      const chainId = await this.getChainId();
+      this.client = (0,external_viem_namespaceObject.createWalletClient)({
+        chain: this.chains.find(x => x.id === chainId),
+        transport: (0,external_viem_namespaceObject.custom)(provider)
+      });
+      const account = await this.getAccount();
       provider.on("accountsChanged", this.onAccountsChanged.bind(this));
       provider.on("chainChanged", this.onChainChanged.bind(this));
-      const chainId = await this.getChainId();
       const unsupported = this.isChainUnsupported(chainId);
       return {
         account,
@@ -113,9 +113,8 @@ class Web3AuthConnector extends core_namespaceObject.Connector {
     }
   }
   async getAccount() {
-    const provider = new external_ethers_namespaceObject.providers.Web3Provider(await this.getProvider());
-    const signer = provider.getSigner();
-    const account = await signer.getAddress();
+    const [address] = await this.client.getAddresses();
+    const account = (0,external_viem_namespaceObject.getAccount)(address).address;
     return account;
   }
   async getProvider() {
@@ -165,7 +164,7 @@ class Web3AuthConnector extends core_namespaceObject.Connector {
       const provider = await this.getProvider();
       if (!provider) throw new Error("Please login first");
       await this.web3AuthInstance.addChain({
-        chainNamespace: CHAIN_NAMESPACES.EIP155,
+        chainNamespace: base_namespaceObject.CHAIN_NAMESPACES.EIP155,
         chainId: `0x${chain.id.toString(16)}`,
         rpcTarget: chain.rpcUrls.default.http[0],
         displayName: chain.name,
@@ -189,7 +188,7 @@ class Web3AuthConnector extends core_namespaceObject.Connector {
   }
   onAccountsChanged(accounts) {
     if (accounts.length === 0) this.emit("disconnect");else this.emit("change", {
-      account: external_ethers_namespaceObject.utils.getAddress(accounts[0])
+      account: (0,external_viem_namespaceObject.getAccount)(accounts[0]).address
     });
   }
   isChainUnsupported(chainId) {
@@ -295,7 +294,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "Web3AuthConnector": () => (/* reexport safe */ _lib_connector__WEBPACK_IMPORTED_MODULE_0__.a)
 /* harmony export */ });
-/* harmony import */ var _lib_connector__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(210);
+/* harmony import */ var _lib_connector__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(528);
 /* harmony import */ var _lib_interfaces__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(470);
 /* harmony import */ var _lib_interfaces__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_lib_interfaces__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony reexport (unknown) */ var __WEBPACK_REEXPORT_OBJECT__ = {};
