@@ -184,4 +184,4 @@ class Web3AuthConnector extends Connector {
 }
 
 export { Web3AuthConnector };
-//# sourceMappingURL=forkedWeb3authWagmiConnector.esm.js.map
+//# sourceMappingURL=web3authWagmiConnector.esm.js.map

@@ -307,4 +307,4 @@ __webpack_require__.r(__webpack_exports__);
 module.exports = __webpack_exports__;
 /******/ })()
 ;
-//# sourceMappingURL=forkedWeb3authWagmiConnector.cjs.js.map
+//# sourceMappingURL=web3authWagmiConnector.cjs.js.map
